@@ -40,3 +40,5 @@ def naver_today_news(query):
                 page = page + 1
                 is_next = True
     return json.dumps(news_list, ensure_ascii=False)
+
+print(naver_today_news("jdc"))
