@@ -41,4 +41,4 @@ def naver_today_news(query):
                 is_next = True
     return json.dumps(news_list, ensure_ascii=False)
 
-print(naver_today_news("jdc"))
+#print(naver_today_news("jdc"))
