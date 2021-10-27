@@ -1,0 +1,42 @@
+import requests
+from bs4 import BeautifulSoup as bs
+import datetime
+import json
+
+ 
+
+def naver_today_news(query):
+    #현재 시간 기준 24시간전 기사 검색
+    now = datetime.datetime.now() 
+    de = now.strftime("%Y.%m.%d.%H.%M")
+    ds = (now - datetime.timedelta(days=1)).strftime("%Y.%m.%d.%H.%M")
+    # 1페이지 부터 검색
+    page = 1
+    #URL 정보
+    base_url = "https://search.naver.com/search.naver?where=news&sm=tab_opt&sort=1&photo=0&field=0&pd=4"
+    search_condition = "&query={}&ds={}&de={}&start={}"
+    
+    #제목과 내용을 원소로 가지는 튜플 리스트
+    news_list = []
+    is_next = True
+    while is_next:
+        is_next = False
+        url = base_url + search_condition.format(query,ds,de,(page-1) * (10) + 1)
+        req = requests.get(url)
+        #print(url)
+        #print(req)
+        html = ''
+        if req.status_code != '200' :
+            html = req.text
+            soup = bs(html,'lxml')
+            not_found = soup.select(".not_found02")
+            if not not_found: #뉴스가 있으면
+                news_title = soup.select(".news_tit")
+                news_desc = soup.select(".news_dsc")
+                #제목과 설명 zip 하여 리스트에 추가
+                search_list = [{'title':title.text.strip(),'desc':desc.text.strip()} for (title,desc) in zip(news_title,news_desc)]
+                for l in search_list:
+                    news_list.append(l)
+                page = page + 1
+                is_next = True
+    return json.dumps(news_list, ensure_ascii=False)
